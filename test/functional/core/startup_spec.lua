@@ -128,6 +128,7 @@ describe('startup', function()
   end)
 
   describe('-l Lua', function()
+    local fname = 'Xtest-functional-startup-spec'
     local function assert_l_out(expected, nvim_args, lua_args, script, input)
       local args = { nvim_prog }
       vim.list_extend(args, nvim_args or {})
@@ -140,6 +141,19 @@ describe('startup', function()
         return eq(dedent(expected), out)
       end
     end
+
+    it('outputs the correct EOF when executing Lua script using -l', function()
+      write_file(fname, 'print("foo")')
+
+      local p = n.spawn_wait('-l', fname)
+
+      eq(0, p.status)
+      if is_os('win') then
+        eq('foo\r\n', p.stderr)
+      else
+        eq('foo\n', p.stderr)
+      end
+    end)
 
     it('failure modes', function()
       -- nvim -l <empty>
@@ -328,7 +342,8 @@ describe('startup', function()
       '+lua print(("C"):rep(1234))',
       '+q',
     })
-    eq(('A'):rep(1234) .. '\r\n' .. ('B'):rep(1234) .. '\r\n' .. ('C'):rep(1234), out)
+
+    eq(('A'):rep(1234) .. '\n' .. ('B'):rep(1234) .. '\n' .. ('C'):rep(1234), out)
   end)
 
   it('pipe at both ends: has("ttyin")==0 has("ttyout")==0', function()
@@ -493,7 +508,7 @@ describe('startup', function()
 
   it('input from pipe + file args #7679', function()
     eq(
-      'ohyeah\r\n0 0 bufs=3',
+      'ohyeah\n0 0 bufs=3',
       fn.system({
         nvim_prog,
         '-n',
@@ -514,7 +529,7 @@ describe('startup', function()
 
   it('if stdin is empty: selects buffer 2, deletes buffer 1 #8561', function()
     eq(
-      '\r\n  2 %a   "file1"                        line 0\r\n  3      "file2"                        line 0',
+      '\n  2 %a   "file1"                        line 0\n  3      "file2"                        line 0',
       fn.system({
         nvim_prog,
         '-n',
@@ -534,7 +549,7 @@ describe('startup', function()
 
   it('if stdin is empty and - is last: selects buffer 1, deletes buffer 3 #35269', function()
     eq(
-      '\r\n  1 %a   "file1"                        line 0\r\n  2      "file2"                        line 0',
+      '\n  1 %a   "file1"                        line 0\n  2      "file2"                        line 0',
       fn.system({
         nvim_prog,
         '-n',
@@ -754,7 +769,7 @@ describe('startup', function()
     local expected = ''
     local period = 100
     for i = 1, period - 1 do
-      expected = expected .. i .. '\r\n'
+      expected = expected .. i .. '\n'
     end
     expected = expected .. period
     eq(
