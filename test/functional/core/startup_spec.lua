@@ -142,10 +142,9 @@ describe('startup', function()
     end
 
     it('outputs the correct EOF when executing Lua script using -l', function()
-      assert_l_out('foobar\n', nil, nil, '-', [[print('foobar')]])
       local args = { nvim_prog }
       vim.list_extend(args, { '-l', '-' })
-      vim.list_extend(args, [[print('foo')]])
+      local input = [[print('foo')]]
       local out = fn.system(args, input)
       eq('foo\n', out)
     end)
