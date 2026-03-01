@@ -143,16 +143,7 @@ describe('startup', function()
     end
 
     it('outputs the correct EOF when executing Lua script using -l', function()
-      write_file(fname, 'print("foo")')
-
-      local p = n.spawn_wait('-l', fname)
-
-      eq(0, p.status)
-      if is_os('win') then
-        eq('foo\r\n', p.stderr)
-      else
-        eq('foo\n', p.stderr)
-      end
+      assert_l_out('foobar\n', nil, nil, '-', [[print('foobar')]])
     end)
 
     it('failure modes', function()
