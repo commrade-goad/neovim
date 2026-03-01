@@ -128,7 +128,6 @@ describe('startup', function()
   end)
 
   describe('-l Lua', function()
-    local fname = 'Xtest-functional-startup-spec'
     local function assert_l_out(expected, nvim_args, lua_args, script, input)
       local args = { nvim_prog }
       vim.list_extend(args, nvim_args or {})
@@ -144,6 +143,11 @@ describe('startup', function()
 
     it('outputs the correct EOF when executing Lua script using -l', function()
       assert_l_out('foobar\n', nil, nil, '-', [[print('foobar')]])
+      local args = { nvim_prog }
+      vim.list_extend(args, { '-l', '-' })
+      vim.list_extend(args, [[print('foo')]])
+      local out = fn.system(args, input)
+      eq('foo\n', out)
     end)
 
     it('failure modes', function()
